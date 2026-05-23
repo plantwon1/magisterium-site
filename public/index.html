@@ -115,6 +115,11 @@
 
 <body>
 
+  <div id="adminBox">
+    <input id="adminPass" type="password" placeholder="Master password">
+    <button onclick="enableMaster()">Enable Master Mode</button>
+  </div>
+
   <div id="chat"></div>
 
   <div id="inputBar">
@@ -202,6 +207,30 @@
         }
       });
 
+
+    function enableMaster() {
+
+      const password =
+        document.getElementById("adminPass").value;
+
+      fetch("/master", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ password })
+      })
+      .then(res => res.json())
+      .then(data => {
+
+        if (data.success) {
+          addMessage("Master mode enabled", "assistant");
+        } else {
+          addMessage("Wrong password", "assistant");
+        }
+
+      });
+    }
   </script>
 
 </body>

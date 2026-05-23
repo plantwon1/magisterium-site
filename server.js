@@ -6,6 +6,14 @@ const express = require("express");
 
 const app = express();
 
+const session = require("express-session");
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || "dev_secret",
+  resave: false,
+  saveUninitialized: true
+}));
+
 const chatLimiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000,
   max: 20,
@@ -20,7 +28,22 @@ const chatLimiter = rateLimit({
 app.use(express.json());
 app.use(express.static("public"));
 
+app.post("/master", (req, res) => {
+
+  const { password } = req.body;
+
+  if (password === process.env.MASTER_PASSWORD) {
+    req.session.isMaster = true;
+    return res.json({ success: true });
+  }
+
+  res.status(401).json({ success: false });
+});
+
 app.post("/chat", chatLimiter, async (req, res) => {
+
+  const isMaster = req.session.isMaster === true;
+  const limit = isMaster ? 1000 : 20;
 
   try {
 
