@@ -1,13 +1,28 @@
 require("dotenv").config();
 
+const rateLimit = require("express-rate-limit");
+
 const express = require("express");
 
 const app = express();
 
+const chatLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000, // 24 hours
+
+  max: 20, // 20 requests per IP per day
+
+  message: {
+    error: "Daily limit reached. Try again tomorrow."
+  },
+
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 app.use(express.json());
 app.use(express.static("public"));
 
-app.post("/chat", async (req, res) => {
+app.post("/chat", chatLimiter, async (req, res) => {
 
   try {
 
