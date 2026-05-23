@@ -180,13 +180,17 @@
           })
         });
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
-      const reply =
-        data.choices[0].message.content;
+	if (data.error) {
+	  addMessage(data.error, "assistant");
+	  return;
+	}
 
-      addMessage(reply, "assistant");
+	addMessage(
+	  data.choices[0].message.content,
+	  "assistant"
+	);
     }
 
     document

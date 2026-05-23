@@ -7,16 +7,14 @@ const express = require("express");
 const app = express();
 
 const chatLimiter = rateLimit({
-  windowMs: 24 * 60 * 60 * 1000, // 24 hours
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 20,
 
-  max: 20, // 20 requests per IP per day
-
-  message: {
-    error: "Daily limit reached. Try again tomorrow."
-  },
-
-  standardHeaders: true,
-  legacyHeaders: false
+  handler: (req, res) => {
+    res.status(429).json({
+      error: "You’ve reached your daily limit of 20 messages. Try again tomorrow."
+    });
+  }
 });
 
 app.use(express.json());
