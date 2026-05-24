@@ -138,102 +138,135 @@
 
   </div>
 
-  <script>
+<script>
 
-    const chat =
-      document.getElementById("chat");
+  const chat =
+    document.getElementById("chat");
 
-    function addMessage(text, className) {
+  function addMessage(text, className) {
 
-      const div =
-        document.createElement("div");
+    const div =
+      document.createElement("div");
 
-      div.className =
-        `message ${className}`;
+    div.className =
+      `message ${className}`;
 
-      div.innerHTML = marked.parse(text);
+    div.innerHTML =
+      marked.parse(text);
 
-      chat.appendChild(div);
+    chat.appendChild(div);
 
-      chat.scrollTop =
-        chat.scrollHeight;
-    }
+    chat.scrollTop =
+      chat.scrollHeight;
+  }
 
-    async function sendMessage() {
+  async function sendMessage() {
 
-      const input =
-        document.getElementById("message");
+    const input =
+      document.getElementById("message");
 
-      const message =
-        input.value.trim();
+    const message =
+      input.value.trim();
 
-      if (!message) return;
+    if (!message) return;
 
-      addMessage(message, "user");
+    addMessage(message, "user");
 
-      input.value = "";
+    input.value = "";
 
-      const response =
-        await fetch("/chat", {
+    const response =
+      await fetch("/chat", {
 
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify({
-            message
-          })
-        });
-
-      const data = await response.json();
-
-	if (data.error) {
-	  addMessage(data.error, "assistant");
-	  return;
-	}
-
-	addMessage(
-	  data.choices[0].message.content,
-	  "assistant"
-	);
-    }
-
-    document
-      .getElementById("message")
-      .addEventListener("keydown", (e) => {
-
-        if (e.key === "Enter") {
-          sendMessage();
-        }
-      });
-
-
-    function enableMaster() {
-
-      const password =
-        document.getElementById("adminPass").value;
-
-      fetch("/master", {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ password })
-      })
-      .then(res => res.json())
-      .then(data => {
 
-        if (data.success) {
-          addMessage("Master mode enabled", "assistant");
-        } else {
-          addMessage("Wrong password", "assistant");
-        }
-
+        body: JSON.stringify({
+          message
+        })
       });
+
+    const data =
+      await response.json();
+
+    if (data.error) {
+      addMessage(data.error, "assistant");
+      return;
     }
-  </script>
+
+    const reply =
+      data.choices[0].message.content;
+
+    typeMessage(reply);
+  }
+
+  document
+    .getElementById("message")
+    .addEventListener("keydown", (e) => {
+
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+
+  function enableMaster() {
+
+    const password =
+      document.getElementById("adminPass").value;
+
+    fetch("/master", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ password })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+      if (data.success) {
+        addMessage("Master mode enabled", "assistant");
+      } else {
+        addMessage("Wrong password", "assistant");
+      }
+
+    });
+  }
+
+
+  function typeMessage(text) {
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      "message assistant";
+
+    chat.appendChild(div);
+
+    let i = 0;
+
+    const interval = setInterval(() => {
+
+      div.innerHTML =
+        marked.parse(text.slice(0, i));
+
+      chat.scrollTop =
+        chat.scrollHeight;
+
+      i++;
+
+      if (i > text.length) {
+        clearInterval(interval);
+      }
+
+    }, 10);
+  }
+
+</script>
 
 </body>
 </html>
