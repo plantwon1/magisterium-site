@@ -6,6 +6,8 @@ const express = require("express");
 
 const app = express();
 
+let conversation = [];
+
 const session = require("express-session");
 
 app.use(session({
@@ -47,6 +49,12 @@ app.post("/chat", chatLimiter, async (req, res) => {
 
   try {
 
+    conversation.push({
+      role: "user",
+      content: req.body.message
+    });
+
+
     const response = await fetch(
       "https://www.magisterium.com/api/v1/chat/completions",
       {
@@ -62,17 +70,20 @@ app.post("/chat", chatLimiter, async (req, res) => {
         body: JSON.stringify({
           model: "magisterium-1",
 
-          messages: [
-            {
-              role: "user",
-              content: req.body.message
-            }
-          ]
+          messages: conversation
         })
       }
     );
 
     const data = await response.json();
+
+    const reply =
+      data.choices[0].message.content;
+
+    conversation.push({
+      role: "assistant",
+      content: reply
+    });
 
     res.json(data);
 
