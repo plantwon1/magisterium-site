@@ -111,6 +111,8 @@
 
   </style>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 </head>
 
 <body>
@@ -149,7 +151,7 @@
       div.className =
         `message ${className}`;
 
-      div.textContent = text;
+      div.innerHTML = marked.parse(text);
 
       chat.appendChild(div);
 
